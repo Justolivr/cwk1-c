@@ -48,11 +48,32 @@ struct Image *load_image(const char *filename)
     /* Allocate the Image object, and read the image from the file */
     /* TODO: Question 3b */
     struct Image *img = malloc(sizeof(struct Image)); /* This is allocating some memory to the size of the image*/
-    if(fscan(f, "%d , %d", &img->width, &img->height) != 2){
-
+    if (!img) {
+        fclose(f);
+        return NULL;
     }
 
+    if(fscan(f, "%d , %d", &img->width, &img->height) != 2){
+        fprint(stderr, "Invalid format for the image.\n ");
+        free(img);
+        fclose(f);
+        return NULL;
+    }
 
+    img->pixels = malloc(img->height*img->width* sizeof(struct Pixel));
+    
+    if (!img->pixels) {
+        free(img);
+        fclose(f);
+        return NULL;
+    }
+
+    if (fread(img->pixels, sizeof(struct Pixel), img->height * img->width, f) != (size_t)(img->height * img->width)) {
+        fprintf(stderr, "Error reading image data.\n");
+        free_image(img);
+        fclose(f);
+        return NULL;
+    }
     /* Close the file */
      fclose(f);
 
@@ -69,7 +90,12 @@ struct Image *load_image(const char *filename)
 bool save_image(const struct Image *img, const char *filename)
 {
     /* TODO: Question 3c */
-    return false;
+    FILE *f =fopen(filename, "wb"); 
+    fprintf(f, " %d %d", img->height, img->width);
+    if(fwrite(img->pixels, sizeof(struct pixels), img->height*img->width, f) != (size_t)(img->height, img->width)){
+        return false;
+    }
+    return true;
 }
 
 /* Allocate a new struct Image and copy an existing struct Image's contents
@@ -77,14 +103,24 @@ bool save_image(const struct Image *img, const char *filename)
 struct Image *copy_image(const struct Image *source)
 {
     /* TODO: Question 3d */
-    return NULL;
+     struct Image *copy = malloc(sizeof(struct Image));
+    if (!copy) return NULL;
+    copy->height = source->height;
+    copy->width = source->width;
+    copy->pixels = malloc(copy->height * copy->width * sizeof(struct Pixel));
+    if (!copy->pixels) {
+        free(copy);
+        return NULL;
+    }
+    memcpy(copy->pixels, source->pixels, copy->height * copy->width * sizeof(struct Pixel));
+    return copy;
 }
 
 /* Perform your first task.
  * (TODO: Write a better comment here, and rename the function.
  * You may need to add or change arguments depending on the task.)
  * Returns a new struct Image containing the result, or NULL on error. */
-struct Image *apply_BLUR(const struct Image *source)
+struct Image *apply_MEDIAN(const struct Image *source)
 {
     /* TODO: Question 4 */
     return NULL;
@@ -94,7 +130,7 @@ struct Image *apply_BLUR(const struct Image *source)
  * (TODO: Write a better comment here, and rename the function.
  * You may need to add or change arguments depending on the task.)
  * Returns true on success, or false on error. */
-bool apply_NORM(const struct Image *source)
+bool apply_HIST(const struct Image *source)
 {
     /* TODO: Question 5 */
     return false;
