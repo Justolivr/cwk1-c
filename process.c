@@ -123,7 +123,30 @@ struct Image *copy_image(const struct Image *source)
 struct Image *apply_MEDIAN(const struct Image *source)
 {
     /* TODO: Question 4 */
-    return NULL;
+    struct Image *filtered = copy_image(source);
+    if (!filtered) return NULL;
+
+    for(int y = 1; y < source->height - 1; y++ ){
+        for(int x = 1 ; y <source->width -1; x++){
+             for (int y = 1; y < source->height - 1; y++) {
+        for (int x = 1; x < source->width - 1; x++) {
+            struct Pixel neighbors[5];
+            neighbors[0] = source->pixels[y * source->width + x];
+            neighbors[1] = source->pixels[(y - 1) * source->width + x];
+            neighbors[2] = source->pixels[(y + 1) * source->width + x];
+            neighbors[3] = source->pixels[y * source->width + (x - 1)];
+            neighbors[4] = source->pixels[y * source->width + (x + 1)];
+
+            // Sort the neighbors based on red channel
+            qsort(neighbors, 5, sizeof(struct Pixel), compare_pixels);
+
+            // Assign the median pixel
+            filtered->pixels[y * source->width + x] = neighbors[2];  // Median is at index 2
+        }
+    }
+    return filtered;
+        }
+    }
 }
 
 /* Perform your second task.
