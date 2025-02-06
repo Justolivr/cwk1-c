@@ -53,8 +53,8 @@ struct Image *load_image(const char *filename)
         return NULL;
     }
 
-    if(fscan(f, "%d , %d", &img->width, &img->height) != 2){
-        fprint(stderr, "Invalid format for the image.\n ");
+    if(fscanf(f, "HP8 %d %d", &img->width, &img->height) != 2){
+        fprintf(stderr, "Invalid format for the image.\n ");
         free(img);
         fclose(f);
         return NULL;
@@ -92,7 +92,7 @@ bool save_image(const struct Image *img, const char *filename)
     /* TODO: Question 3c */
     FILE *f =fopen(filename, "wb"); 
     fprintf(f, " %d %d", img->height, img->width);
-    if(fwrite(img->pixels, sizeof(struct pixels), img->height*img->width, f) != (size_t)(img->height, img->width)){
+    if(fwrite(img->pixels, sizeof(struct Pixel), img->height*img->width, f) != (size_t)(img->height, img->width)){
         return false;
     }
     return true;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     }
 
     /* Apply the first process */
-    struct Image *out_img = apply_BLUR(in_img);
+    struct Image *out_img = apply_MEDIAN(in_img);
     if (out_img == NULL) {
         fprintf(stderr, "First process failed.\n");
         free_image(in_img);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     }
 
     /* Apply the second process */
-    if (!apply_NORM(out_img)) {
+    if (!apply_HIST(out_img)) {
         fprintf(stderr, "Second process failed.\n");
         free_image(in_img);
         free_image(out_img);
